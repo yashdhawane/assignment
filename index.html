@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hypermart Checkout Assignment</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .controls {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .controls input {
+      width: 100px;
+      padding: 5px;
+      font-size: 1rem;
+      margin-right: 10px;
+    }
+    .controls button {
+      padding: 6px 12px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    #checkout-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    .checkout {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 15px;
+    }
+    .checkout h2 {
+      margin-top: 0;
+      font-size: 1.2rem;
+    }
+    .queue {
+      list-style: none;
+      padding: 0;
+      margin: 10px 0;
+    }
+    .queue li {
+      background: #e2e2e2;
+      margin: 5px 0;
+      padding: 5px;
+      border-radius: 4px;
+    }
+    .total {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hypermart Checkout Queues</h1>
+  <div class="controls">
+    <input type="number" id="item-count" placeholder="# of items" min="1" />
+    <button id="add-btn">Add Customer</button>
+  </div>
+  <div id="checkout-container"></div>
+
+  <script>
+    // Number of checkout counters
+    const NUM_CHECKOUTS = 3;
+
+    // Initialize queues: each checkout has an array of item counts and a total
+    const checkouts = Array.from({ length: NUM_CHECKOUTS }, () => ({ items: [], total: 0 }));
+
+    const container = document.getElementById('checkout-container');
+    const input = document.getElementById('item-count');
+    const addBtn = document.getElementById('add-btn');
+
+    // Render the checkout UI
+    function render() {
+      container.innerHTML = '';
+      checkouts.forEach((checkout, index) => {
+        const div = document.createElement('div');
+        div.className = 'checkout';
+
+        const title = document.createElement('h2');
+        title.textContent = `Checkout ${index + 1}`;
+        div.appendChild(title);
+
+        const list = document.createElement('ul');
+        list.className = 'queue';
+        checkout.items.forEach((count) => {
+          const li = document.createElement('li');
+          li.textContent = `${count} item${count > 1 ? 's' : ''}`;
+          list.appendChild(li);
+        });
+        div.appendChild(list);
+
+        const total = document.createElement('div');
+        total.className = 'total';
+        total.textContent = `Total: ${checkout.total}`;
+        div.appendChild(total);
+
+        container.appendChild(div);
+      });
+    }
+
+    // Assign new customer to the least-loaded checkout
+    function addCustomer(count) {
+      // Find the minimum total
+      let minTotal = Infinity;
+      let targetIndex = 0;
+
+      checkouts.forEach((checkout, idx) => {
+        if (checkout.total < minTotal) {
+          minTotal = checkout.total;
+          targetIndex = idx;
+        }
+      });
+
+      // Assign customer
+      checkouts[targetIndex].items.push(count);
+      checkouts[targetIndex].total += count;
+
+      render();
+    }
+
+    // Event listener for the button
+    addBtn.addEventListener('click', () => {
+      const count = parseInt(input.value, 10);
+      if (isNaN(count) || count < 1) {
+        alert('Please enter a valid number of items (>=1).');
+        return;
+      }
+      addCustomer(count);
+      input.value = '';
+      input.focus();
+    });
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
